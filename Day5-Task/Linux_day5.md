@@ -44,8 +44,10 @@
 
 **Tell me**: 
 - Did Nginx install successfully?
-- Is it responding on port 80?
+-Yes
+- Is it responding on port 80? yes confird via ss
 - What does the default page show?
+-“Welcome to Nginx”
 
 ---
 
@@ -108,8 +110,11 @@
 
 **Tell me**: 
 - Did your custom page load successfully?
+-Yes — confirmed by curl http://localhost | head -10 showing your custom HTML (<title>DevOps Learning - Day 5</title>).
 - What content does curl show?
+-it shows updated page
 - Are the file permissions correct?
+- yes owner is root --rw-r--r-- 1 root root 1140 ...
 
 ---
 
@@ -178,8 +183,19 @@
 
 **Tell me**: 
 - Did the virtual host configuration test pass?
+-(syntax is ok
+configuration file /etc/nginx/nginx.conf test is successful)
 - Can you access the site on port 8080?
+(Yes — curl http://localhost:8080 returned your custom HTML.)
 - What content appears on the new virtual host?
+(<h1>🛠️ DevOps Tools Site</h1>
+<p>This is a separate virtual host!</p>
+<ul>
+    <li>Docker</li>
+    <li>Kubernetes</li>
+    <li>Jenkins</li>
+    <li>Monitoring Tools</li>
+</ul>)
 
 ---
 
@@ -251,8 +267,13 @@
 
 **Tell me**: 
 - How many requests were logged today?
+(15 Request)
 - Are there any errors in the error log?
+(No critical errors. The only entry is a notice:)
 - What are the most requested pages?
+(Top pages are:
+/ → requested 14 times (your main site root).
+/developmentserver/metadatauploader → requested 1 time.)
 
 ---
 
@@ -306,10 +327,13 @@
 
 **Tell me**: 
 - Did the SSL certificate generate successfully?
+(yes)
 - Can you access the HTTPS site on port 8443?
+(yes)
 - What certificate information is shown?
-
----
+(subject=C=US, ST=State, L=City, O=DevOps, CN=localhost
+notBefore=Sep 23 14:46:18 2025 GMT
+notAfter=Sep 23 14:46:18 2026 GMT)
 
 ## TASK 6: Reverse Proxy Configuration
 **What you'll learn**: Set up Nginx as a reverse proxy
@@ -322,10 +346,18 @@
    python3 -m http.server 8000 &
    PYTHON_PID=$!
    ```
+   (echo "<h1>Backend Service</h1><p>This is served by Python on port 8000</p>" > backend.html
+   python3 -m http.server 8000 &
+   PYTHON_PID=$!
+[1] 2650)
 2. Test the backend directly:
    ```bash
    curl http://localhost:8000/backend.html
    ```
+   (curl http://localhost:8000/backend.html
+127.0.0.1 - - [23/Sep/2025 15:42:01] "GET /backend.html HTTP/1.1" 200 -
+<h1>Backend Service</h1><p>This is served by Python on port 8000</p>)
+
 3. Create reverse proxy configuration:
    ```bash
    sudo tee /etc/nginx/sites-available/reverse-proxy << 'EOF'
@@ -349,10 +381,18 @@
    sudo nginx -t
    sudo systemctl reload nginx
    ```
+   (sudo ln -s /etc/nginx/sites-available/reverse-proxy /etc/nginx/sites-enabled/
+sudo nginx -t
+sudo systemctl reload nginx
+nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+nginx: configuration file /etc/nginx/nginx.conf test is successful)
 5. Test reverse proxy:
    ```bash
    curl http://localhost:9000/backend.html
    ```
+   (curl http://localhost:9000/backend.html
+127.0.0.1 - - [23/Sep/2025 15:45:49] "GET /backend.html HTTP/1.0" 200 -
+<h1>Backend Service</h1><p>This is served by Python on port 8000</p>)
 6. Stop the Python server:
    ```bash
    kill $PYTHON_PID 2>/dev/null || pkill -f "python3 -m http.server"
@@ -360,8 +400,12 @@
 
 **Tell me**: 
 - Did the reverse proxy work correctly?
+(❌ No — the Python backend on port 8000 terminated right away, so the reverse proxy had nothing to forward traffic to.)
 - Could you access the backend through port 9000?
+(❌ No — since port 8000 wasn’t serving content, Nginx on 9000 also failed.)
 - What's the difference between direct and proxied access?
+(Direct access (:8000) means the client talks straight to the Python HTTP server.
+Proxied access (:9000) means the client talks to Nginx, which relays the request to the Python)
 
 ---
 
@@ -426,8 +470,11 @@
 
 **Tell me**: 
 - How much memory is Nginx using?
+(21.60 MB)
 - How many ports is Nginx listening on?
+(4 ports → 80, 8080, 8443, and 9000)
 - Is the Nginx configuration valid?
+(Yes — nginx -t reports syntax is OK)
 
 ---
 
@@ -538,8 +585,11 @@
 
 **Tell me**: 
 - Did the automated deployment complete successfully?
+(Yes — deployment finished, config validated, and page served.)
 - Was a backup created?
+(website_backup_2025-09-23_15-58-52.tar.gz)
 - Does the new deployed page load correctly?
+(Yes — curl showed Automated Deployment Successful!, and HTTP status was 200)
 
 ---
 
