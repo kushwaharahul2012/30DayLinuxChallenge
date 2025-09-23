@@ -48,7 +48,7 @@
 - Is it responding on port 80? yes confird via ss
 - What does the default page show?
 -“Welcome to Nginx”
- ---
+ ---::
 ---
 
 ## TASK 2: Create Custom Web Content
