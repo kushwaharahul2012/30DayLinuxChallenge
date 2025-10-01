@@ -1301,7 +1301,7 @@ Scan images with Trivy for vulnerabilities.
 Avoid privileged mode (--privileged) unless strictly needed.
 Consider read-only root filesystems in production.
 
----
+---=
 
 ## 📋 Day 7 Summary
 
